@@ -3,14 +3,30 @@ import Head from 'next/head'
 import React from 'react'
 import Layout from '../../components/Layout';
 import styled from "styled-components";
+import Link from 'next/link';
+import Image from 'next/image';
 
 export async function getStaticProps(context: any) {
   const params = context.params;
-  const blogDetails: any = await getBlogDetail(params.id); // 「params.id」とは動的ルーティングの[id].tsxを指している。
+  const blogDetails: any = await getBlogDetail(params.id)
 
+  // 全てのブログを取得しタイトルとidを表示。ページャで使用。
+  const blogList = await getBlogList()
+  // 現在の記事のインデックスを取得
+  const currentIndex = blogList.contents.findIndex((content: any) => content.id === params.id);
+
+  // 前後の記事のIDを取得
+  const nextId = currentIndex > 0 ? blogList.contents[currentIndex - 1].id : null;
+  const prevId = currentIndex < blogList.contents.length - 1 ? blogList.contents[currentIndex + 1].id : null;
+
+  // 前後の記事のデータを取得
+  const nextData = nextId ? await getBlogDetail(nextId) : null;
+  const prevData = prevId ? await getBlogDetail(prevId) : null;
   return {
     props: {
       blogDetails,
+      nextData,
+      prevData
     }
   };
 }
@@ -116,7 +132,7 @@ margin-top: 100px;
 `
 
 
-function Post({ blogDetails }: any) {
+function Post({ blogDetails, prevData, nextData }: any) {
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -144,6 +160,42 @@ function Post({ blogDetails }: any) {
             <div className="line"></div>
             <div className='body' dangerouslySetInnerHTML={{ __html: `${blogDetails.content}` }} />
           </BlogContent>
+
+          <SectionPrevNextStyle>
+            <div className="inner">
+
+              {prevData &&
+                <Link href={`/allposts/${prevData.id}`} className="box prev">
+                  <p className='p'>前の記事</p>
+                  <div className="boxImg">
+                    {prevData.eyecatch ? <Image src={prevData.eyecatch.url} width={500} height={0} alt="" /> : <Image src="/img/defaultimage.jpg" width={500} height={0} alt="" />}
+                  </div>
+                  <div className="textBox">
+                    <p className="title">{prevData.title}</p>
+                    <p className="body">
+                      {prevData.content.replace(/<[^>]*>/g, '').length > 35 ? prevData.content.replace(/<[^>]*>/g, '').slice(0, 35) + "..." : prevData.content.replace(/<[^>]*>/g, '')}
+                    </p>
+                  </div>
+                </Link>
+              }
+
+              {nextData &&
+                <Link href={`/allposts/${nextData.id}`} className="box next">
+                  <p className='p'>次の記事</p>
+                  <div className="boxImg">
+                    {nextData.eyecatch ? <Image src={nextData.eyecatch.url} width={500} height={0} alt="" /> : <Image src="/img/defaultimage.jpg" width={500} height={0} alt="" />}
+                  </div>
+                  <div className="textBox">
+                    <p className="title">{nextData.title}</p>
+                    <p className="body">
+                      {nextData.content.replace(/<[^>]*>/g, '').length > 35 ? nextData.content.replace(/<[^>]*>/g, '').slice(0, 35) + "..." : nextData.content.replace(/<[^>]*>/g, '')}
+                    </p>
+                  </div>
+                </Link>
+              }
+
+            </div>
+          </SectionPrevNextStyle>
         </main>
       </Layout>
     </>
