@@ -137,7 +137,7 @@ function Post({ blogDetails }: any) {
         <main>
           <BlogContent>
             <h1 className='title'>{blogDetails.title}</h1>
-            <p className='category'>カテゴリー：{blogDetails.category.name}</p>
+            <p className='category'>カテゴリーあ：{blogDetails.category.name}</p>
             <p className="date">
               {formattedDate}
             </p>
