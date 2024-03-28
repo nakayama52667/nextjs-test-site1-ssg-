@@ -4,7 +4,16 @@ const client = createClient({
   serviceDomain: process.env.NEXT_PUBLIC_SERVICE_DOMAIN || "",
   apiKey: process.env.NEXT_PUBLIC_API_KEY || "",
 
-
+  // 以下、microcmsの強制キャッシュクリア
+  customFetch: (input: any, init: any) => {
+    if (typeof input === 'string') {
+      const newInput = new URL(input)
+      const time = new Date()
+      newInput.searchParams.set('cacheclearparam', `${time.getMinutes()}`)
+      return fetch(newInput.href, init)
+    }
+    return fetch(input, init)
+  },
 
 });
 

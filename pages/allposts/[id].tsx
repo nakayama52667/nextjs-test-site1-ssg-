@@ -6,28 +6,8 @@ import styled from "styled-components";
 
 export async function getStaticProps(context: any) {
   const params = context.params;
-  let blogDetails;
+  const blogDetails: any = await getBlogDetail(params.id); // 「params.id」とは動的ルーティングの[id].tsxを指している。
 
-  // 10秒以内にgetBlogDetail関数を呼び出してデータを取得する
-  const timeoutPromise = new Promise((resolve, reject) => {
-    setTimeout(async () => {
-      try {
-        blogDetails = await getBlogDetail(params.id);
-        resolve(blogDetails);
-      } catch (error) {
-        reject(error);
-      }
-    }, 10000); // 10秒待つ
-  });
-
-  try {
-    // getBlogDetailの処理を待つ
-    blogDetails = await timeoutPromise;
-  } catch (error) {
-    console.error("Timeout occurred while fetching blog details:", error);
-    // タイムアウトが発生した場合は空のデータを返すか、エラーをハンドリングする
-    blogDetails = {};
-  }
   return {
     props: {
       blogDetails,
